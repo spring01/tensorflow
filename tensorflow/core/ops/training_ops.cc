@@ -746,14 +746,15 @@ static Status ApplyAMSGradShapeFn(InferenceContext* c, bool sparse) {
   ShapeHandle s = ShapeOrHandleShape(c, 0);                       // var
   TF_RETURN_IF_ERROR(c->Merge(s, ShapeOrHandleShape(c, 1), &s));  // m
   TF_RETURN_IF_ERROR(c->Merge(s, ShapeOrHandleShape(c, 2), &s));  // v
-  TF_RETURN_IF_ERROR(c->WithRank(c->input(3), 0, &unused));       // beta1_power
-  TF_RETURN_IF_ERROR(c->WithRank(c->input(4), 0, &unused));       // beta2_power
-  TF_RETURN_IF_ERROR(c->WithRank(c->input(5), 0, &unused));       // lr
-  TF_RETURN_IF_ERROR(c->WithRank(c->input(6), 0, &unused));       // beta1
-  TF_RETURN_IF_ERROR(c->WithRank(c->input(7), 0, &unused));       // beta2
-  TF_RETURN_IF_ERROR(c->WithRank(c->input(8), 0, &unused));       // epsilon
+  TF_RETURN_IF_ERROR(c->Merge(s, ShapeOrHandleShape(c, 3), &s));  // vhat
+  TF_RETURN_IF_ERROR(c->WithRank(c->input(4), 0, &unused));       // beta1_power
+  TF_RETURN_IF_ERROR(c->WithRank(c->input(5), 0, &unused));       // beta2_power
+  TF_RETURN_IF_ERROR(c->WithRank(c->input(6), 0, &unused));       // lr
+  TF_RETURN_IF_ERROR(c->WithRank(c->input(7), 0, &unused));       // beta1
+  TF_RETURN_IF_ERROR(c->WithRank(c->input(8), 0, &unused));       // beta2
+  TF_RETURN_IF_ERROR(c->WithRank(c->input(9), 0, &unused));       // epsilon
   TF_RETURN_IF_ERROR(
-      HandleGradAndIndicesInputs(c, sparse, 9 /* grad_idx */, &s));
+      HandleGradAndIndicesInputs(c, sparse, 10 /* grad_idx */, &s));
   if (c->num_outputs() > 0) {
     c->set_output(0, s);
   }
@@ -764,6 +765,7 @@ REGISTER_OP("ApplyAMSGrad")
     .Input("var: Ref(T)")
     .Input("m: Ref(T)")
     .Input("v: Ref(T)")
+    .Input("vhat: Ref(T)")
     .Input("beta1_power: T")
     .Input("beta2_power: T")
     .Input("lr: T")
@@ -783,6 +785,7 @@ REGISTER_OP("ResourceApplyAMSGrad")
     .Input("var: resource")
     .Input("m: resource")
     .Input("v: resource")
+    .Input("vhat: resource")
     .Input("beta1_power: T")
     .Input("beta2_power: T")
     .Input("lr: T")

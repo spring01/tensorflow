@@ -126,6 +126,7 @@ class AMSGradOptimizer(optimizer.Optimizer):
     for v in var_list:
       self._zeros_slot(v, "m", self._name)
       self._zeros_slot(v, "v", self._name)
+      self._zeros_slot(v, "vhat", self._name)
 
   def _prepare(self):
     self._lr_t = ops.convert_to_tensor(self._lr, name="learning_rate")
@@ -136,9 +137,10 @@ class AMSGradOptimizer(optimizer.Optimizer):
   def _apply_dense(self, grad, var):
     m = self.get_slot(var, "m")
     v = self.get_slot(var, "v")
+    vhat = self.get_slot(var, "vhat")
     beta1_power, beta2_power = self._get_beta_accumulators()
-    return training_ops.apply_adam(
-        var, m, v,
+    return training_ops.apply_ams_grad(
+        var, m, v, vhat,
         math_ops.cast(beta1_power, var.dtype.base_dtype),
         math_ops.cast(beta2_power, var.dtype.base_dtype),
         math_ops.cast(self._lr_t, var.dtype.base_dtype),
@@ -150,9 +152,10 @@ class AMSGradOptimizer(optimizer.Optimizer):
   def _resource_apply_dense(self, grad, var):
     m = self.get_slot(var, "m")
     v = self.get_slot(var, "v")
+    vhat = self.get_slot(var, "vhat")
     beta1_power, beta2_power = self._get_beta_accumulators()
-    return training_ops.resource_apply_adam(
-        var.handle, m.handle, v.handle,
+    return training_ops.resource_apply_ams_grad(
+        var.handle, m.handle, v.handle, vhat.handle,
         math_ops.cast(beta1_power, grad.dtype.base_dtype),
         math_ops.cast(beta2_power, grad.dtype.base_dtype),
         math_ops.cast(self._lr_t, grad.dtype.base_dtype),
