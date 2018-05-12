@@ -4004,6 +4004,22 @@ cuda_py_test(
 )
 
 cuda_py_test(
+    name = "amsgrad_test",
+    size = "small",
+    srcs = ["training/amsgrad_test.py"],
+    additional_deps = [
+        ":array_ops",
+        ":framework",
+        ":math_ops",
+        ":platform",
+        ":training",
+        ":platform_test",
+        ":client_testlib",
+        "//third_party/py/numpy",
+    ],
+)
+
+cuda_py_test(
     name = "moving_averages_test",
     size = "small",
     srcs = [
